@@ -8,3 +8,5 @@ cache
 .vscode
 artifacts
 cache
+package.json
+package-lock.json
